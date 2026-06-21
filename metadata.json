@@ -1,0 +1,6 @@
+{
+  "name": "EcoSense",
+  "description": "A Carbon Footprint Awareness Platform to show people the environmental cost of their decisions before they make them.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
