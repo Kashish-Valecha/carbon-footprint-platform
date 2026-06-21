@@ -42,21 +42,23 @@ export default function FoodChecker() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div className="flex flex-col gap-2 mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-200">Food Carbon Checker</h2>
+        <h1 id="food-heading" className="text-2xl font-semibold tracking-tight text-slate-200">Food Carbon Checker</h1>
         <p className="text-sm text-slate-400">Select what you plan to eat to see its environmental impact.</p>
       </div>
 
-      <div className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6">
+      <section aria-labelledby="food-heading" className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6">
         <div className="space-y-3">
-          <label className="text-xs uppercase tracking-widest text-slate-500 font-bold block">Select Meal Items</label>
-          <div className="grid grid-cols-2 gap-3">
+          <label id="food-items-label" className="text-xs uppercase tracking-widest text-slate-500 font-bold block">Select Meal Items</label>
+          <div className="grid grid-cols-2 gap-3" role="group" aria-labelledby="food-items-label">
             {foodOptions.map((item) => {
               const isSelected = selectedItems.includes(item);
               return (
                 <button
                   key={item}
+                  type="button"
+                  aria-pressed={isSelected}
                   onClick={() => toggleItem(item)}
-                  className={`text-left px-4 py-3 rounded-xl border transition-all ${
+                  className={`text-left px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                     isSelected 
                       ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
                       : 'border-slate-800 bg-[#1a1a1a] text-slate-400 hover:border-slate-600'
@@ -72,12 +74,14 @@ export default function FoodChecker() {
         <button
           onClick={handleCheck}
           disabled={selectedItems.length === 0 || loading}
-          className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mt-4"
+          aria-busy={loading}
+          aria-disabled={selectedItems.length === 0 || loading}
+          className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mt-4 focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#111] focus:ring-emerald-500 outline-none"
         >
           {loading ? 'Calculating...' : 'Calculate Meal Impact'}
-          {!loading && <ArrowRight className="h-4 w-4" />}
+          {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
         </button>
-      </div>
+      </section>
 
       {loading && <InsightCard text="" loading={true} />}
 

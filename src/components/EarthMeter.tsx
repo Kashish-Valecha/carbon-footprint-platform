@@ -15,11 +15,16 @@ export default function EarthMeter({ percent }: { percent: number }) {
   else if (percent > 80) emoji = '🥵';
 
   return (
-    <div className="bg-[#111] border border-slate-800 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="bg-[#111] border border-slate-800 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden"
+         role="meter" 
+         aria-label={`Earth damage meter showing ${percent} percent`} 
+         aria-valuenow={percent} 
+         aria-valuemin={0} 
+         aria-valuemax={100}>
       <h2 className="text-sm text-slate-400 uppercase tracking-widest mb-6">Earth Damage Meter</h2>
       
-      <div className="relative w-48 h-48">
-        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+      <div className="relative w-48 h-48" aria-hidden="true">
+        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100" role="img" aria-hidden="true">
           <circle
             className="text-slate-800 stroke-current"
             strokeWidth="8"
@@ -50,8 +55,9 @@ export default function EarthMeter({ percent }: { percent: number }) {
       </div>
       
       <div className="mt-6 text-center flex flex-col items-center">
-        <span className="text-2xl mb-2">{emoji}</span>
+        <span className="text-2xl mb-2" aria-hidden="true">{emoji}</span>
         <p className="text-xs text-slate-500 text-center max-w-[240px]">
+          <span className="sr-only">Meter shows {percent}%. </span>
           {percent > 100 
             ? "You've exceeded the average weekly carbon limit!" 
             : "Percent of the average Indian weekly carbon footprint used."}

@@ -29,15 +29,15 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 mb-2">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-200">Your Impact Dashboard</h2>
+        <h1 id="dashboard-heading" className="text-2xl font-semibold tracking-tight text-slate-200">Your Impact Dashboard</h1>
         <p className="text-sm text-slate-400">Track your carbon footprint and earn green points.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section aria-labelledby="dashboard-heading" className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StreakCard streak={data.streak} totalPoints={data.totalPoints} />
         
         <div className="bg-[#111] border border-slate-800 rounded-3xl p-8 flex flex-col justify-center">
-          <h3 className="text-[10px] uppercase text-slate-500 font-bold mb-2 tracking-widest">Weekly Grade</h3>
+          <h2 className="text-[10px] uppercase text-slate-500 font-bold mb-2 tracking-widest">Weekly Grade</h2>
           <div className="flex flex-col">
             <span className={`text-4xl tracking-tight font-bold ${
               data.weeklyGrade === 'A' ? 'text-emerald-400' : 
@@ -52,7 +52,7 @@ export default function Dashboard() {
             <strong className="text-slate-300">{data.weeklyCo2}kg CO2</strong> emitted this week
           </p>
         </div>
-      </div>
+      </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <EarthMeter percent={data.earthMeterPercent} />
@@ -61,7 +61,7 @@ export default function Dashboard() {
           <InsightCard text={data.insight} />
 
           <div className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8">
-            <h3 className="text-lg font-semibold mb-6">Quick Actions</h3>
+            <h2 className="text-lg font-semibold mb-6">Quick Actions</h2>
             <div className="space-y-3">
               <Link to="/trip" className="flex items-center justify-between p-4 rounded-xl bg-[#1a1a1a] border border-slate-800 hover:border-slate-700 transition-colors group">
                 <div className="flex items-center gap-4">

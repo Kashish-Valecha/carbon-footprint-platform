@@ -58,14 +58,14 @@ export default function DailyLog() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div className="flex flex-col gap-2 mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-200">Log Daily Activity</h2>
+        <h1 id="log-heading" className="text-2xl font-semibold tracking-tight text-slate-200">Log Daily Activity</h1>
         <p className="text-sm text-slate-400">Record your choices to build your green streak.</p>
       </div>
 
       {successData && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 mb-6 flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
+        <div role="alert" aria-live="polite" className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 mb-6 flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
           <div className="bg-emerald-500 p-3 rounded-full mb-4 shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-            <Check className="h-8 w-8 text-black" />
+            <Check className="h-8 w-8 text-black" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-emerald-400 mb-2">Activity Logged Successfully!</h2>
           <div className="flex items-center gap-4 mb-3">
@@ -79,18 +79,20 @@ export default function DailyLog() {
         </div>
       )}
 
-      <form onSubmit={handleLog} className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8 space-y-8">
+      <form onSubmit={handleLog} aria-labelledby="log-heading" className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8 space-y-8">
         {/* Date Selector */}
         <div className="space-y-3">
-          <label className="text-xs uppercase tracking-widest text-slate-500 font-bold flex items-center gap-2">
-            <Calendar className="h-4 w-4" /> Activity Date
+          <label htmlFor="log-date" className="text-xs uppercase tracking-widest text-slate-500 font-bold flex items-center gap-2">
+            <Calendar className="h-4 w-4" aria-hidden="true" /> Activity Date
           </label>
           <input 
+            id="log-date"
             type="date"
             required
+            aria-required="true"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm focus:outline-none focus:border-emerald-500 transition-colors [&::-webkit-calendar-picker-indicator]:filter-invert"
+            className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors [&::-webkit-calendar-picker-indicator]:filter-invert"
           />
         </div>
 
@@ -98,14 +100,15 @@ export default function DailyLog() {
 
         {/* Transport */}
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Transport</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <h3 id="transport-mode-label" className="text-sm font-bold text-slate-300 uppercase tracking-wider">Transport</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" role="group" aria-labelledby="transport-mode-label">
             {['flight', 'car', 'bus', 'train'].map((m) => (
               <button
                 type="button"
                 key={m}
+                aria-pressed={transportMode === m}
                 onClick={() => setTransportMode(m === transportMode ? '' : m)}
-                className={`px-3 py-3 rounded-xl border transition-all text-sm capitalize font-medium ${
+                className={`px-3 py-3 rounded-xl border transition-all text-sm capitalize font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 outline-none ${
                   transportMode === m
                     ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
                     : 'border-slate-800 bg-[#1a1a1a] text-slate-400 hover:border-slate-600'
@@ -116,14 +119,18 @@ export default function DailyLog() {
             ))}
           </div>
           {transportMode && (
-            <input 
-              type="number"
-              min="0"
-              placeholder="Distance in km"
-              value={distance}
-              onChange={(e) => setDistance(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition-colors mt-2"
-            />
+            <div className="mt-2 space-y-2">
+               <label htmlFor="distance-input" className="sr-only">Distance in km</label>
+               <input 
+                 id="distance-input"
+                 type="number"
+                 min="0"
+                 placeholder="Distance in km"
+                 value={distance}
+                 onChange={(e) => setDistance(e.target.value)}
+                 className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
+               />
+            </div>
           )}
         </div>
 
@@ -131,10 +138,10 @@ export default function DailyLog() {
 
         {/* Meals */}
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Meals Eaten</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <h3 id="meals-label" className="text-sm font-bold text-slate-300 uppercase tracking-wider">Meals Eaten</h3>
+          <div className="grid grid-cols-2 gap-3" role="group" aria-labelledby="meals-label">
             {foodOptions.map((item) => (
-               <label key={item} className="flex items-center gap-3 p-3 rounded-xl border border-slate-800 hover:border-slate-600 cursor-pointer transition-colors bg-[#1a1a1a]">
+               <label key={item} className="flex items-center gap-3 p-3 rounded-xl border border-slate-800 hover:border-slate-600 cursor-pointer transition-colors bg-[#1a1a1a] focus-within:ring-2 focus-within:ring-emerald-500">
                  <input 
                    type="checkbox"
                    checked={selectedItems.includes(item)}
@@ -151,28 +158,31 @@ export default function DailyLog() {
 
         {/* Electricity */}
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex justify-between items-center">
-            Electricity Usage
+          <label htmlFor="electricity-input" className="text-sm font-bold text-slate-300 uppercase tracking-wider flex justify-between items-center w-full">
+            <span>Electricity Usage</span>
             <span className="text-[10px] text-slate-500 font-bold opacity-60">Avg ~4 units/day</span>
-          </h3>
+          </label>
           <input 
+            id="electricity-input"
             type="number"
             min="0"
             step="0.5"
             placeholder="Units (kWh) used"
             value={electricity}
             onChange={(e) => setElectricity(e.target.value)}
-            className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+            className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading || (!transportMode && selectedItems.length === 0 && !electricity)}
-          className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-4 rounded-xl transition-colors flex items-center justify-center gap-2 mt-8"
+          aria-busy={loading}
+          aria-disabled={loading || (!transportMode && selectedItems.length === 0 && !electricity)}
+          className="w-full bg-emerald-500 hover:bg-emerald-400 focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#111] focus:ring-emerald-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-4 rounded-xl transition-colors flex items-center justify-center gap-2 mt-8"
         >
           {loading ? 'Saving...' : 'Save to Log'}
-          {!loading && <Send className="h-4 w-4" />}
+          {!loading && <Send className="h-4 w-4" aria-hidden="true" />}
         </button>
       </form>
     </div>

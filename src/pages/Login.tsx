@@ -46,29 +46,35 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Email</label>
+            <label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Email</label>
             <input 
+              id="email"
               type="email" 
               required
+              aria-required="true"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-3 text-slate-300 text-sm focus:outline-none focus:border-emerald-500"
+              className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-3 text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Password</label>
+            <label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Password</label>
             <input 
+              id="password"
               type="password" 
               required
+              aria-required="true"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-3 text-slate-300 text-sm focus:outline-none focus:border-emerald-500"
+              className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-3 text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition-colors mt-4"
+            aria-busy={loading}
+            aria-disabled={loading}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#111] focus:ring-emerald-500 disabled:opacity-50 text-black font-bold py-3 rounded-xl transition-colors mt-4"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

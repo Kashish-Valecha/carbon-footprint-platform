@@ -18,9 +18,9 @@ export default function Leaderboard() {
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-2 mb-2">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-200 flex items-center gap-2">
-           <Trophy className="text-yellow-500 h-6 w-6" /> Live Leaderboard
-        </h2>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-200 flex items-center gap-2">
+           <Trophy className="text-yellow-500 h-6 w-6" aria-hidden="true" /> Live Leaderboard
+        </h1>
         <p className="text-sm text-slate-400">See how you rank against the global community.</p>
       </div>
 

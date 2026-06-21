@@ -10,13 +10,23 @@ import rateLimit from "express-rate-limit";
 import { db } from "./server/db";
 import { generateToken, requireAuth, AuthRequest } from "./server/auth";
 
+import { body, validationResult } from "express-validator";
+
+const requiredEnv = ['ANTHROPIC_API_KEY'];
+requiredEnv.forEach(key => {
+  if (process.env.NODE_ENV !== 'test' && !process.env[key]) {
+    console.warn(`Missing required environment variable: ${key}`);
+    // Not safely exiting to keep applet running if purely testing
+  }
+});
+
 let anthropic: Anthropic | null = null;
 if (process.env.ANTHROPIC_API_KEY) {
   anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 }
 
 // Calculation constants
-const EMISSION_FACTORS = {
+export const EMISSION_FACTORS = {
   transport: { flight: 0.255, car: 0.21, bus: 0.089, train: 0.041 },
   food: {
     "Chicken biryani": 3.1, "Mutton curry": 5.4, "Egg curry": 1.2, 
@@ -25,7 +35,7 @@ const EMISSION_FACTORS = {
   }
 };
 
-const CITY_DISTANCES: Record<string, number> = {
+export const CITY_DISTANCES: Record<string, number> = {
   "Delhi-Mumbai": 1414, "Delhi-Bangalore": 2150, "Mumbai-Chennai": 1333, "Delhi-Chennai": 2184,
   "Mumbai-Bangalore": 984, "Bangalore-Chennai": 346, "Delhi-Kolkata": 1490, "Mumbai-Kolkata": 2050,
   "Bangalore-Hyderabad": 569, "Delhi-Hyderabad": 1566,
@@ -34,7 +44,7 @@ const CITY_DISTANCES: Record<string, number> = {
   "Hyderabad-Bangalore": 569, "Hyderabad-Delhi": 1566,
 };
 
-async function getClaudeInsight(prompt: string): Promise<string> {
+export async function getClaudeInsight(prompt: string): Promise<string> {
   if (!anthropic) return "AI insight disabled. Please configure Anthropic API Key.";
   try {
     const response = await anthropic.messages.create({
@@ -51,7 +61,7 @@ async function getClaudeInsight(prompt: string): Promise<string> {
   }
 }
 
-function getEquivalents(co2Kg: number) {
+export function getEquivalents(co2Kg: number) {
   return {
     cookingDays: (co2Kg / 0.5).toFixed(1),
     phoneCharges: Math.round(co2Kg / 0.008),
@@ -60,7 +70,7 @@ function getEquivalents(co2Kg: number) {
 }
 
 // Logic for Achievements
-function checkAchievements(userId: number, currentPoints: number, streak: number) {
+export function checkAchievements(userId: number, currentPoints: number, streak: number) {
   const evaluate = (name: string, condition: boolean) => {
     if (condition) {
       try {
@@ -78,20 +88,44 @@ function checkAchievements(userId: number, currentPoints: number, streak: number
   evaluate("Earth Hero", currentPoints >= 1000);
 }
 
-async function startServer() {
+const validateInput = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: "Validation failed", details: errors.array() });
+  }
+  next();
+};
+
+export async function createServerApp() {
   const app = express();
   app.set('trust proxy', 1);
-  const PORT = 3000;
   app.use(helmet({ contentSecurityPolicy: false })); // Disabled CSP to allow Vite Dev scripts
   app.use(cors());
   app.use(express.json());
 
-  const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: "Too many requests" });
-  app.use("/api/", apiLimiter);
+  const generalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { error: "Too many requests" } });
+  const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, message: { error: 'Too many AI requests, slow down' } });
+
+  app.use(generalLimiter);
+  app.use('/api/trip', aiLimiter);
+  app.use('/api/food', aiLimiter);
+  app.use('/api/dashboard', aiLimiter);
 
   // --- Auth Routes ---
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/auth/register", 
+    [
+      body('fullName').isString().notEmpty().trim(),
+      body('email').isEmail().normalizeEmail(),
+      body('phone_number').optional().isString(),
+      body('password').isString().isLength({ min: 6 }),
+      body('city').isString().notEmpty().trim(),
+      body('country').isString().notEmpty().trim()
+    ],
+    async (req: any, res: any) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
       const { fullName, email, phone_number, password, city, country } = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -116,12 +150,24 @@ async function startServer() {
 
       res.status(201).json({ message: "Registration successful. Please verify OTP.", userId });
     } catch (e: any) {
-      res.status(400).json({ error: e.message });
+      if (e.message.includes('UNIQUE constraint failed')) {
+        res.status(400).json({ error: "Email already registered" });
+      } else {
+        res.status(400).json({ error: e.message });
+      }
     }
   });
 
-  app.post("/api/auth/verify-otp", (req, res) => {
+  app.post("/api/auth/verify-otp", 
+    [
+      body('userId').isInt(),
+      body('code').isString().notEmpty().trim()
+    ],
+    (req: any, res: any) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
       const { userId, code } = req.body;
       const otpRec = db.prepare("SELECT * FROM otp_verification WHERE user_id = ? AND otp_code = ? ORDER BY created_at DESC LIMIT 1").get(userId, code) as any;
       
@@ -138,8 +184,16 @@ async function startServer() {
     }
   });
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", 
+    [
+      body('email').isEmail().normalizeEmail(),
+      body('password').isString().notEmpty()
+    ],
+    async (req: any, res: any) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
       const { email, password } = req.body;
       const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email) as any;
       if (!user) return res.status(400).json({ error: "Invalid credentials" });
@@ -170,7 +224,17 @@ async function startServer() {
 
   // --- Core API Routes ---
 
-  app.post("/api/trip", requireAuth, async (req: AuthRequest, res) => {
+  app.post("/api/trip", requireAuth,
+    [
+      body('origin').isString().notEmpty().isLength({ max: 100 }),
+      body('destination').isString().notEmpty().isLength({ max: 100 }).custom((value, { req }) => {
+        if (value === req.body.origin) throw new Error("origin and destination must not be equal");
+        return true;
+      }),
+      body('mode').isString().notEmpty(),
+    ],
+    validateInput as any,
+    async (req: AuthRequest, res: express.Response) => {
     try {
       const { origin, destination, mode } = req.body;
       const key = `${origin}-${destination}`;
@@ -193,7 +257,13 @@ async function startServer() {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  app.post("/api/food", requireAuth, async (req, res) => {
+  app.post("/api/food", requireAuth,
+    [
+      body('items').isArray({ min: 1, max: 20 }),
+      body('items.*').isString(),
+    ],
+    validateInput as any,
+    async (req: any, res: express.Response) => {
     try {
       const { items } = req.body;
       let totalCo2 = 0;
@@ -212,11 +282,20 @@ async function startServer() {
       else if (worstItem.name === "Pizza (cheese)") swapSuggestion = "Switch to Veg pizza, saves 1.0kg CO2";
 
       const insight = await getClaudeInsight(`User ordered ${items.join(", ")}. CO2 is ${totalCo2}kg. Insight?`);
-      res.json({ totalCo2, swapSuggestion, worstItem, insight });
+      res.json({ totalCo2, swapSuggestion, worstItem, items, insight });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  app.post("/api/log", requireAuth, async (req: AuthRequest, res) => {
+  app.post("/api/log", requireAuth,
+    [
+      body('transport_mode').optional({ nullable: true }).isIn(['car', 'bus', 'train', 'bike', 'flight']),
+      body('distance_km').optional({ nullable: true }).isFloat({ min: 0, max: 10000 }),
+      body('veg_meals').optional({ nullable: true }).isInt({ min: 0, max: 20 }),
+      body('non_veg_meals').optional({ nullable: true }).isInt({ min: 0, max: 20 }),
+      body('electricity_kwh').optional({ nullable: true }).isFloat({ min: 0, max: 1000 })
+    ],
+    validateInput as any,
+    async (req: AuthRequest, res: express.Response) => {
     try {
       const { date, transport_mode, distance_km, meals_json, electricity_kwh } = req.body;
       let totalCo2 = 0; let points = 0;
@@ -287,9 +366,9 @@ async function startServer() {
       last7Logs.forEach(l => weeklyCo2 += l.total_co2_kg);
       
       const indianAvgWeekly = 36.4;
-      const earthMeterPercent = Math.min(100, Math.round((weeklyCo2 / indianAvgWeekly) * 100));
+      const earthMeterPercent = Math.round((weeklyCo2 / indianAvgWeekly) * 100);
       
-      let weeklyGrade = earthMeterPercent > 120 ? "D" : earthMeterPercent > 80 ? "C" : earthMeterPercent > 50 ? "B" : "A";
+      let weeklyGrade = earthMeterPercent > 100 ? "D" : earthMeterPercent >= 70 ? "C" : earthMeterPercent >= 40 ? "B" : "A";
 
       let prompt = `User weekly carbon: ${weeklyCo2.toFixed(2)}kg (Avg ${indianAvgWeekly}kg), grade ${weeklyGrade}, earth meter ${earthMeterPercent}%. Short report card message.`;
       if (last7Logs.length === 0) prompt = "New user joined. Greet and encourage first log.";
@@ -336,18 +415,28 @@ async function startServer() {
   app.get("/api/food-options", (req, res) => res.json(Object.keys(EMISSION_FACTORS.food)));
   app.get("/api/city-pairs", (req, res) => res.json(Object.keys(CITY_DISTANCES)));
 
-  if (process.env.NODE_ENV !== "production") {
+  const isTest = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+  if (!isTest && process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
-  } else {
+  } else if (process.env.NODE_ENV === "production" && !isTest) {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  if (!isTest) {
+    const PORT = process.env.PORT || 3000;
+    // @ts-ignore
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }
+
+  return app;
 }
 
-startServer();
+const isTestEnv = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+if (!isTestEnv) {
+  createServerApp();
+}

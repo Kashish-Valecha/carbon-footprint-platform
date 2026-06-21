@@ -38,11 +38,29 @@ ANTHROPIC_API_KEY="your_key_here"
 5. Browse to \`http://localhost:3000\`
 
 ## API Endpoints
-- \`POST /api/trip\` - Acccepts { origin, destination, mode }, returns detailed comparison & Claude insight.
-- \`POST /api/food\` - Accepts { items: string[] }, returns total CO2, swap suggestion & insight.
-- \`POST /api/log\` - Records { date, transport_mode, distance_km, meals_json, electricity_kwh }.
-- \`GET /api/dashboard\` - Returns aggregated user stats such as streak, earth meter, and weekly grade.
-- \`GET /api/history\` - Returns the last 30 daily logs.
+- `POST /api/trip` - Acccepts { origin, destination, mode }, returns detailed comparison & Claude insight.
+- `POST /api/food` - Accepts { items: string[] }, returns total CO2, swap suggestion & insight.
+- `POST /api/log` - Records { date, transport_mode, distance_km, meals_json, electricity_kwh }.
+- `GET /api/dashboard` - Returns aggregated user stats such as streak, earth meter, and weekly grade.
+- `GET /api/history` - Returns the last 30 daily logs.
+
+## Testing
+The application includes a comprehensive test suite covering the core business logic, API validation, and gamification rules. 
+The backend tests ensure that equations output accurately across transport formulas, food tables, and streak evaluations.
+
+To run the tests:
+```bash
+npm run test
+```
+To run tests in watch mode during development:
+```bash
+npm run test:watch
+```
+
+Tests included:
+- **`tests/calculator.test.ts`**: Verifies emission factor calculations across all transport modes, food items, electricity, and edge cases.
+- **`tests/api.test.ts`**: Verifies API endpoints for trip, food, dashboard, and daily logs, as well as status codes and error handling.
+- **`tests/gamification.test.ts`**: Tests the green points allocation, streak management (including reset rules), and the logical flow of the Weekly Grade (A, B, C, D) generator and Earth Damage meter.
 
 ## Screenshots
 *(Add screenshots of your application here)*

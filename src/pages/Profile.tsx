@@ -44,8 +44,8 @@ export default function Profile() {
         {/* Achievements Card */}
         <div className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
-             <h3 className="font-bold text-lg text-slate-200">Achievements</h3>
-             <Trophy className="h-5 w-5 text-yellow-500" />
+             <h2 className="font-bold text-lg text-slate-200">Achievements</h2>
+             <Trophy className="h-5 w-5 text-yellow-500" aria-hidden="true" />
           </div>
           {profileData.achievements && profileData.achievements.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -74,7 +74,7 @@ export default function Profile() {
             <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Longest Streak</span>
           </div>
           <div className="col-span-2 bg-[#111] border border-slate-800 rounded-3xl p-6">
-             <h3 className="font-bold text-sm text-slate-400 mb-6 uppercase tracking-widest">CO2 Emissions Trend</h3>
+             <h2 className="font-bold text-sm text-slate-400 mb-6 uppercase tracking-widest">CO2 Emissions Trend</h2>
              <div className="h-[200px] w-full">
                <ResponsiveContainer width="100%" height="100%">
                  <AreaChart data={stats}>

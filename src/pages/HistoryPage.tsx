@@ -30,7 +30,7 @@ export default function HistoryPage() {
     <div className="space-y-6">
        <div className="flex justify-between items-end mb-6">
          <div>
-           <h2 className="text-2xl font-semibold tracking-tight text-slate-200">Activity History</h2>
+           <h1 className="text-2xl font-semibold tracking-tight text-slate-200">Activity History</h1>
            <p className="text-sm text-slate-400">Review your past logs and calculate your trends.</p>
          </div>
          <button onClick={exportCSV} className="flex items-center gap-2 hover:bg-slate-800 transition-colors p-2 px-4 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-300 border border-slate-700">

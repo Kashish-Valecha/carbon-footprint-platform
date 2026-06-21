@@ -36,17 +36,19 @@ export default function TripChecker() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div className="flex flex-col gap-2 mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-200">Trip Impact Checker</h2>
+        <h1 id="trip-heading" className="text-2xl font-semibold tracking-tight text-slate-200">Trip Impact Checker</h1>
         <p className="text-sm text-slate-400">See the environmental cost of your journey before you go.</p>
       </div>
 
-      <div className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6">
+      <section aria-labelledby="trip-heading" className="bg-[#111] border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6">
         <div className="space-y-3">
-          <label className="text-xs uppercase tracking-widest text-slate-500 font-bold block">Select Route</label>
+          <label htmlFor="route-select" className="text-xs uppercase tracking-widest text-slate-500 font-bold block">Select Route</label>
           <select 
-            className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+            id="route-select"
+            className="w-full bg-[#1a1a1a] border border-slate-800 rounded-xl p-4 text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
             value={selectedPair}
             onChange={(e) => setSelectedPair(e.target.value)}
+            aria-required="true"
           >
             <option value="">-- Choose a city pair --</option>
             {cityPairs.map(p => <option key={p} value={p}>{p.replace("-", " to ")}</option>)}
@@ -54,8 +56,8 @@ export default function TripChecker() {
         </div>
 
         <div className="space-y-3">
-          <label className="text-xs uppercase tracking-widest text-slate-500 font-bold block">Travel Mode</label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <label id="travel-mode-label" className="text-xs uppercase tracking-widest text-slate-500 font-bold block">Travel Mode</label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" role="group" aria-labelledby="travel-mode-label">
             {[
               { id: 'flight', icon: Plane, label: 'Flight' },
               { id: 'car', icon: Car, label: 'Car' },
@@ -64,14 +66,16 @@ export default function TripChecker() {
             ].map((m) => (
               <button
                 key={m.id}
+                type="button"
+                aria-pressed={mode === m.id}
                 onClick={() => setMode(m.id)}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all ${
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                   mode === m.id 
                     ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
                     : 'border-slate-800 bg-[#1a1a1a] text-slate-400 hover:border-slate-600'
                 }`}
               >
-                <m.icon className={`h-6 w-6 mb-2 ${mode === m.id ? 'text-emerald-400' : ''}`} />
+                <m.icon className={`h-6 w-6 mb-2 ${mode === m.id ? 'text-emerald-400' : ''}`} aria-hidden="true" />
                 <span className="text-sm font-medium">{m.label}</span>
               </button>
             ))}
@@ -81,12 +85,14 @@ export default function TripChecker() {
         <button
           onClick={handleCheck}
           disabled={!selectedPair || loading}
-          className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mt-4"
+          aria-busy={loading}
+          aria-disabled={!selectedPair || loading}
+          className="w-full bg-emerald-500 hover:bg-emerald-400 focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#111] focus:ring-emerald-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mt-4"
         >
           {loading ? 'Calculating...' : 'Calculate Impact'}
-          {!loading && <ArrowRight className="h-4 w-4" />}
+          {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
         </button>
-      </div>
+      </section>
 
       {loading && <InsightCard text="" loading={true} />}
 
