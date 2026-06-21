@@ -1,11 +1,11 @@
-# 🌍 EcoSense — Know Before You Go
+# 🌍 EcoSense - Know Before You Go
 
 > A Carbon Footprint Awareness Platform that shows you the environmental cost of your decisions **before** you make them.
 
 ---
 
 ## Chosen Vertical
-**Challenge 3 — Carbon Footprint Awareness Platform**
+**Challenge 3 - Carbon Footprint Awareness Platform**
 
 Individual carbon footprint tracker focused on **proactive awareness** — not reactive logging. The core idea: intercept decisions at the point of action (booking a trip, ordering food) rather than after the fact.
 
@@ -26,15 +26,15 @@ The gamification layer (streaks, green points, grades) is intentional — awaren
 ## How the Solution Works
 
 **Architecture:**  
-Full-Stack TypeScript — React + Vite (frontend) + Express.js + SQLite (backend), served on a single port (3000). Anthropic Claude API powers all AI insight responses.
+Full-Stack TypeScript - React + Vite (frontend) + Express.js + SQLite (backend), served on a single port (3000). Anthropic Claude API powers all AI insight responses.
 
 ### Features
 
-- ** Dashboard & Gamification** — Weekly Earth Impact Meter, daily streaks, green points system, and an overall impact grade (A–D) benchmarked against the Indian average of 5.2 kg CO2/day
-- ** Trip Impact Checker** — Compare carbon cost of flight vs train vs bus vs car between major Indian cities, with relatable equivalents (phones charged, trees needed, cooking gas days)
-- ** Food Carbon Checker** — Calculate the footprint of your meal and get a Smart Swap suggestion that saves CO2 without sacrificing the meal
-- ** Daily Activity Log** — Log transport, meals, and electricity usage in one place; instantly updates your dashboard streak and points
-- ** AI Insights** — Every action triggers a contextual, conversational, non-preachy insight powered by Anthropic Claude
+- ** Dashboard & Gamification** - Weekly Earth Impact Meter, daily streaks, green points system, and an overall impact grade (A–D) benchmarked against the Indian average of 5.2 kg CO2/day
+- ** Trip Impact Checker** - Compare carbon cost of flight vs train vs bus vs car between major Indian cities, with relatable equivalents (phones charged, trees needed, cooking gas days)
+- ** Food Carbon Checker** - Calculate the footprint of your meal and get a Smart Swap suggestion that saves CO2 without sacrificing the meal
+- ** Daily Activity Log** - Log transport, meals, and electricity usage in one place; instantly updates your dashboard streak and points
+- ** AI Insights** - Every action triggers a contextual, conversational, non-preachy insight powered by Anthropic Claude
 
 ### Emission Calculations
 
